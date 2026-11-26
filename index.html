@@ -1,0 +1,539 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Правовед IQ</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #10172d, #172d50);
+    color: white;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.container {
+    max-width: 750px;
+    margin: 40px auto;
+    background: #202d49;
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 10px 35px #0005;
+}
+
+h1, h2 {
+    text-align: center;
+}
+
+h1 {
+    color: #65b5ff;
+    font-size: 34px;
+}
+
+.subtitle {
+    text-align: center;
+    color: #bdcbe0;
+    margin-bottom: 30px;
+}
+
+button {
+    border: none;
+    border-radius: 12px;
+    padding: 14px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+button:hover {
+    transform: translateY(-2px);
+    opacity: 0.9;
+}
+
+.variant-btn, .main-btn {
+    display: block;
+    width: 100%;
+    margin: 15px 0;
+    background: #2687e8;
+    color: white;
+    font-weight: bold;
+}
+
+.option {
+    display: block;
+    width: 100%;
+    text-align: left;
+    margin: 10px 0;
+    background: #304263;
+    color: white;
+    border: 2px solid transparent;
+}
+
+.option.selected {
+    border-color: #58adff;
+    background: #245b91;
+}
+
+.option.correct {
+    border-color: #35d68a;
+    background: #176b4c;
+}
+
+.option.wrong {
+    border-color: #ff6868;
+    background: #813d48;
+}
+
+.progress {
+    width: 100%;
+    height: 9px;
+    background: #43516d;
+    border-radius: 10px;
+    margin: 20px 0;
+    overflow: hidden;
+}
+
+.progress-bar {
+    height: 100%;
+    width: 0%;
+    background: #42a5ff;
+    transition: 0.3s;
+}
+
+.top-info {
+    display: flex;
+    justify-content: space-between;
+    color: #c4d5ec;
+    gap: 10px;
+}
+
+.navigation {
+    display: flex;
+    gap: 10px;
+    margin-top: 25px;
+}
+
+.navigation button {
+    flex: 1;
+}
+
+.secondary-btn {
+    background: #435574;
+    color: white;
+}
+
+.hidden {
+    display: none;
+}
+
+#result {
+    text-align: center;
+}
+
+.score {
+    font-size: 65px;
+    font-weight: bold;
+    color: #62b5ff;
+    margin: 20px;
+}
+
+.review-item {
+    background: #304263;
+    padding: 15px;
+    border-radius: 12px;
+    margin: 12px 0;
+    text-align: left;
+}
+
+.review-item p {
+    color: #d2e0f2;
+}
+
+@media(max-width: 500px) {
+    .container {
+        padding: 20px;
+        margin: 10px auto;
+    }
+
+    h1 {
+        font-size: 28px;
+    }
+
+    .navigation {
+        flex-direction: column;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <section id="start">
+        <h1>⚖️ Правовед IQ</h1>
+        <p class="subtitle">
+            Проверь свои знания по правоведению!
+        </p>
+
+        <h2>Выбери вариант теста</h2>
+
+        <button class="variant-btn" onclick="startQuiz(0)">
+            Вариант 1
+        </button>
+
+        <button class="variant-btn" onclick="startQuiz(1)">
+            Вариант 2
+        </button>
+    </section>
+
+    <section id="quiz" class="hidden">
+
+        <div class="top-info">
+            <span id="variantName"></span>
+            <span id="questionNumber"></span>
+        </div>
+
+        <div class="progress">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+
+        <h2 id="question"></h2>
+
+        <div id="answers"></div>
+
+        <div class="navigation">
+            <button class="secondary-btn" onclick="previousQuestion()">
+                ← Назад
+            </button>
+
+            <button class="main-btn" onclick="nextQuestion()">
+                Далее →
+            </button>
+        </div>
+
+    </section>
+
+    <section id="result" class="hidden">
+        <h1>Тест завершён!</h1>
+
+        <p>Твой результат:</p>
+
+        <div class="score" id="score"></div>
+
+        <h2 id="resultText"></h2>
+
+        <p id="details"></p>
+
+        <h2>Разбор ответов</h2>
+        <div id="review"></div>
+
+        <button class="main-btn" onclick="restartQuiz()">
+            Пройти заново
+        </button>
+
+        <button class="secondary-btn" onclick="chooseVariant()">
+            Выбрать другой вариант
+        </button>
+    </section>
+
+</div>
+
+<script>
+
+const tests = [
+
+{
+name: "Вариант 1",
+questions: [
+
+{
+q: "Исходные определяющие идеи, составляющие основу системы права",
+a: ["Правовые нормы", "Нормативно-правовые акты", "Правовые принципы", "Нормы общественной морали"],
+correct: 2
+},
+
+{
+q: "Часть правовой нормы, которая подвержена наиболее частым изменениям",
+a: ["Санкция", "Гипотеза", "Диспозиция", "Правовая норма может изменяться только целиком"],
+correct: 2
+},
+
+{
+q: "Законы, закрепляющие основы общественного и государственного устройства, называются:",
+a: ["Конституционными", "Обыкновенными (текущими)", "Подзаконными нормативными актами", "Чрезвычайными законами"],
+correct: 0
+},
+
+{
+q: "Основанием для разграничения правонарушений на преступления и проступки является",
+a: ["Определение закона", "Количество совершаемых правонарушений данного вида", "Общественный вред правонарушения", "Судебное решение"],
+correct: 2
+},
+
+{
+q: "Принцип, обеспечивающий обязательность исполнения законов для всех, в том числе и для органов государственной власти",
+a: ["Принцип сдержек и противовесов", "Принцип верховенства закона", "Принцип взаимной ответственности граждан и государства", "Принцип демократизма"],
+correct: 1
+},
+
+{
+q: "Особое социальное явление, характеризующее правовое состояние как отдельной личности, так и общества, называется",
+a: ["Правосознанием", "Законностью", "Правопорядком", "Правовой культурой"],
+correct: 3
+},
+
+{
+q: "Правоотношения — это",
+a: ["Урегулированные правом общественные отношения", "Урегулированные правом и находящиеся под защитой государства общественные отношения", "Отношения, строящиеся на основании прав субъектов общественных отношений и регулируемые обществом", "Отношения, соответствующие нормам права"],
+correct: 1
+},
+
+{
+q: "Определение «Общеобязательное правило поведения, установленное государством и закрепленное в нормативных правовых актах» относится к понятию",
+a: ["Норма права", "Отрасль права", "Норма морали", "Институт права"],
+correct: 0
+},
+
+{
+q: "Цель юридической ответственности состоит в том, чтобы",
+a: ["Перевоспитать правонарушителя", "Наказать правонарушителя", "Предупредить совершение противоправных действий в будущем", "Все вышеперечисленное"],
+correct: 3
+},
+
+{
+q: "Принцип конституционного устройства КР, реализующийся через признание народа единственным источником власти",
+a: ["Суверенитет народа", "Признание человека и его прав высшей ценностью", "Республиканская форма правления", "Ни один из вышеперечисленных"],
+correct: 0
+}
+
+]
+},
+
+{
+name: "Вариант 2",
+questions: [
+
+{
+q: "Конституционная возможность получения гражданином каких-либо благ называется",
+a: ["Гарантией", "Правом", "Свободой", "Привилегией"],
+correct: 1
+},
+
+{
+q: "Политическое право, которое может быть реализовано лицами, не являющимися гражданами КР",
+a: ["Право избирать", "Право на собрания", "Право быть избранным", "Право на доступ к государственной службе"],
+correct: 1
+},
+
+{
+q: "Важнейшим экономическим правом, закрепленным в Конституции КР, является",
+a: ["Утверждение приоритета государственной собственности", "Запрет наемного труда", "Предоставление дополнительных прав лицам, занятым предпринимательской деятельностью", "Утверждение свободы предпринимательской деятельности"],
+correct: 3
+},
+
+{
+q: "К функциям Президента КР не относится",
+a: ["Выступать гарантом Конституции КР", "Разрабатывать бюджет Кыргызстана", "Принимать меры по охране суверенитета КР", "Определять основные направления внутренней и внешней политики государства"],
+correct: 1
+},
+
+{
+q: "Государственная структура, которая на территории Кыргызской Республики осуществляет контроль за соблюдением всех законов",
+a: ["Кабинет Министров Кыргызской Республики", "Конституционный Суд КР", "Прокуратура КР", "Верховный Суд КР"],
+correct: 2
+},
+
+{
+q: "К какой группе прав и свобод следует отнести право граждан на свободу слова:",
+a: ["Политическим", "Личным (гражданским)", "Культурным", "Социальным"],
+correct: 1
+},
+
+{
+q: "Для приема в гражданство КР требуется:",
+a: ["Постоянное проживание на территории РК не менее 5 лет, владение государственным языком", "Постоянное проживание на территории РК не менее 5 лет", "Постоянное проживание на территории РК не менее 7 лет", "Обязательное знание государственного языка"],
+correct: 0
+},
+
+{
+q: "Какие лица признаются гражданами КР:",
+a: ["Постоянно проживающие в КР на день вступления в силу Закона «О гражданстве» от 21 мая 2007 года бывшие граждане СССР, а также лица, приобретшие гражданство в соответствии с законом", "Постоянно проживающие в других бывших союзных республиках на день вступления в силу Закона «О гражданстве» от 21 мая 2007 года, имеющие близких родственников на территории КР", "Подавшие ходатайство о приеме в гражданство КР", "Временно проживающие в других бывших союзных республиках на день вступления в силу Закона «О гражданстве» от 21 мая 2007 года, имеющие близких родственников на территории КР"],
+correct: 0
+},
+
+{
+q: "Конституционно-правовые нормы-принципы — это:",
+a: ["Определяющие права и обязанности субъектов правоотношения", "Устанавливающие только обязанности", "Устанавливающие идеи, основные начала, на которых строится конституционно-правовое регулирование общественных отношений", "Определяющие права участников правоотношения"],
+correct: 2
+},
+
+{
+q: "Предметом конституционного права являются:",
+a: ["Нормы, устанавливающие правовой статус личности и систему государственных органов", "Общественные отношения, возникающие по поводу устройства государства и организации государственной власти, а также отношения между человеком и государством", "Правовые институты, закрепляющие систему власти и положение человека в государстве", "Нормы, выражающие социальную роль государства и характеризующие его как правовое"],
+correct: 1
+}
+
+]
+}
+
+];
+
+let currentVariant = 0;
+let currentQuestion = 0;
+let userAnswers = [];
+
+function startQuiz(variant) {
+    currentVariant = variant;
+    currentQuestion = 0;
+    userAnswers = Array(tests[variant].questions.length).fill(null);
+
+    document.getElementById("start").classList.add("hidden");
+    document.getElementById("result").classList.add("hidden");
+    document.getElementById("quiz").classList.remove("hidden");
+
+    document.getElementById("variantName").textContent =
+        tests[variant].name;
+
+    showQuestion();
+}
+
+function showQuestion() {
+    const question = tests[currentVariant].questions[currentQuestion];
+
+    document.getElementById("questionNumber").textContent =
+        `Вопрос ${currentQuestion + 1} из 10`;
+
+    document.getElementById("question").textContent = question.q;
+
+    document.getElementById("progressBar").style.width =
+        ((currentQuestion + 1) / 10 * 100) + "%";
+
+    const answers = document.getElementById("answers");
+    answers.innerHTML = "";
+
+    question.a.forEach((answer, index) => {
+        const button = document.createElement("button");
+
+        button.className = "option";
+        button.textContent = `${index + 1}. ${answer}`;
+
+        if (userAnswers[currentQuestion] === index) {
+            button.classList.add("selected");
+        }
+
+        button.onclick = () => {
+            userAnswers[currentQuestion] = index;
+            showQuestion();
+        };
+
+        answers.appendChild(button);
+    });
+}
+
+function nextQuestion() {
+    if (userAnswers[currentQuestion] === null) {
+        alert("Пожалуйста, выбери ответ!");
+        return;
+    }
+
+    if (currentQuestion < 9) {
+        currentQuestion++;
+        showQuestion();
+    } else {
+        finishQuiz();
+    }
+}
+
+function previousQuestion() {
+    if (currentQuestion > 0) {
+        currentQuestion--;
+        showQuestion();
+    }
+}
+
+function finishQuiz() {
+    const questions = tests[currentVariant].questions;
+
+    let score = 0;
+
+    questions.forEach((question, index) => {
+        if (userAnswers[index] === question.correct) {
+            score++;
+        }
+    });
+
+    document.getElementById("quiz").classList.add("hidden");
+    document.getElementById("result").classList.remove("hidden");
+
+    document.getElementById("score").textContent =
+        `${score}/10`;
+
+    document.getElementById("details").textContent =
+        `Правильных ответов: ${score}. Неправильных: ${10 - score}.`;
+
+    let message = "";
+
+    if (score === 10) {
+        message = "Отличный результат! 🏆";
+    } else if (score >= 8) {
+        message = "Очень хорошо! 👏";
+    } else if (score >= 6) {
+        message = "Хороший результат!";
+    } else {
+        message = "Есть над чем поработать!";
+    }
+
+    document.getElementById("resultText").textContent = message;
+
+    const review = document.getElementById("review");
+    review.innerHTML = "";
+
+    questions.forEach((question, index) => {
+        const item = document.createElement("div");
+        item.className = "review-item";
+
+        const title = document.createElement("strong");
+        title.textContent = `${index + 1}. ${question.q}`;
+
+        const yourAnswer = document.createElement("p");
+        const selected = userAnswers[index];
+
+        yourAnswer.textContent = selected === question.correct
+            ? `Твой ответ: ${question.a[selected]} — верно`
+            : `Твой ответ: ${selected === null ? "Нет ответа" : question.a[selected]}`;
+
+        const correctAnswer = document.createElement("p");
+        correctAnswer.textContent =
+            `Правильный ответ: ${question.a[question.correct]}`;
+
+        item.appendChild(title);
+        item.appendChild(yourAnswer);
+        item.appendChild(correctAnswer);
+
+        review.appendChild(item);
+    });
+}
+
+function restartQuiz() {
+    startQuiz(currentVariant);
+}
+
+function chooseVariant() {
+    document.getElementById("quiz").classList.add("hidden");
+    document.getElementById("result").classList.add("hidden");
+    document.getElementById("start").classList.remove("hidden");
+}
+
+</script>
+
+</body>
+</html>
